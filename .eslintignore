@@ -1,0 +1,10 @@
+# Ignore all the following patterns during linting #
+
+# Coverage directory used by tools like istanbul
+coverage
+
+# Dependency directories
+node_modules
+
+# Dist
+dist

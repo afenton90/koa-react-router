@@ -4,7 +4,8 @@
   "description": "react-router middleware for koa 2.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/nyc --check-coverage --lines 95 --functions 95 --branches 95 ./node_modules/.bin/ava",
+    "coverage:report": "./node_modules/.bin/nyc report --reporter=html"
   },
   "dependencies": {
     "babel-polyfill": "^6.20.0",
@@ -17,7 +18,6 @@
     "babel-cli": "^6.18.0",
     "babel-core": "^6.17.0",
     "babel-eslint": "^7.0.0",
-    "babel-plugin-__coverage__": "^11.0.0",
     "babel-plugin-transform-class-properties": "^6.16.0",
     "babel-plugin-transform-object-assign": "^6.8.0",
     "babel-polyfill": "^6.20.0",
@@ -26,11 +26,14 @@
     "babel-preset-stage-0": "^6.16.0",
     "babel-preset-stage-3": "^6.17.0",
     "chai": "^3.5.0",
+    "enzyme": "^2.7.0",
     "eslint": "^3.12.2",
     "eslint-config-airbnb": "^13.0.0",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.8.0",
+    "nyc": "^10.1.2",
+    "react-addons-test-utils": "^15.4.2",
     "sinon": "^1.17.6"
   },
   "repository": {
@@ -50,5 +53,21 @@
   "bugs": {
     "url": "https://github.com/afenton90/koa-react-router/issues"
   },
-  "homepage": "https://github.com/afenton90/koa-react-router#readme"
+  "homepage": "https://github.com/afenton90/koa-react-router#readme",
+  "ava": {
+    "files": [
+      "*.spec.js"
+    ],
+    "verbose": true,
+    "babel": "inherit",
+    "require": [
+      "babel-register",
+      "babel-polyfill"
+    ]
+  },
+  "nyc": {
+    "exclude": [
+      "*.spec.js"
+    ]
+  }
 }
