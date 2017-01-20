@@ -4,7 +4,7 @@
   "description": "react-router middleware for koa 2.",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/nyc --check-coverage --lines 95 --functions 95 --branches 95 ./node_modules/.bin/ava",
+    "test": "./node_modules/.bin/nyc --check-coverage --lines 95 --functions 95 --branches 90 ./node_modules/.bin/ava",
     "coverage:report": "./node_modules/.bin/nyc report --reporter=html"
   },
   "dependencies": {

@@ -19,20 +19,19 @@ const server = ({
         else {
           const {
             Container,
-            Wrapper
+            RouterContainer
           } = await onRender(ctx);
           let view;
-          if (Wrapper) {
+          if (RouterContainer) {
             view = renderToString((
-              <Wrapper>
+              <RouterContainer>
                 <RouterContext {...props} />
-              </Wrapper>
+              </RouterContainer>
             ));
           } else {
             view = renderToString(<RouterContext {...props} />);
           }
 
-          // Render container to static
           const rendered = renderToStaticMarkup(
             <Container>
               <div dangerouslySetInnerHTML={{ __html: view }} />
