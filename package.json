@@ -53,7 +53,10 @@
     "middleware",
     "render"
   ],
-  "author": "Alex Fenton",
+  "author": {
+    "name": "Alex Fenton",
+    "url": "https://github.com/afenton90"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/afenton90/koa-react-router/issues"
