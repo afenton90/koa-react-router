@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderToString, renderToStaticMarkup } from 'react-dom/server';
+import { renderToString } from 'react-dom/server';
 import { match, RouterContext } from 'react-router';
 
 const server = ({
@@ -21,20 +21,21 @@ const server = ({
             Container,
             RouterContainer
           } = await onRender(ctx);
+
           let view;
           if (RouterContainer) {
-            view = renderToString((
+            view = (
               <RouterContainer>
                 <RouterContext {...props} />
               </RouterContainer>
-            ));
+            );
           } else {
-            view = renderToString(<RouterContext {...props} />);
+            view = <RouterContext {...props} />;
           }
 
-          const rendered = renderToStaticMarkup(
+          const rendered = renderToString(
             <Container>
-              <div dangerouslySetInnerHTML={{ __html: view }} />
+              {view}
             </Container>
           );
 
