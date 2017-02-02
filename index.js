@@ -19,7 +19,8 @@ const server = ({
         else {
           const {
             Container,
-            RouterContainer
+            RouterContainer,
+            containerRenderer
           } = await onRender(ctx);
           let view;
           if (RouterContainer) {
@@ -32,11 +33,16 @@ const server = ({
             view = renderToString(<RouterContext {...props} />);
           }
 
-          const rendered = renderToStaticMarkup(
-            <Container>
-              <div dangerouslySetInnerHTML={{ __html: view }} />
-            </Container>
-          );
+          let rendered;
+          if (containerRenderer) {
+            rendered = renderToStaticMarkup(containerRenderer(view));
+          } else {
+            rendered = renderToStaticMarkup(
+              <Container>
+                <div dangerouslySetInnerHTML={{ __html: view }} />
+              </Container>
+            );
+          }
 
           ctx.response.body = rendered;
         }

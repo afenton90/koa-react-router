@@ -189,3 +189,54 @@ This would then be supplied to `koa-react-router` via the `onRender` callback li
 
 This component could also be a `Provider` containing a `redux` store.
 A full example when using redux is coming soon.
+
+#### `containerRenderer`
+
+Optional function for handling the rendering of a container component.  
+This function has one argument which is `view`. This argument is the currently rendered view from the Router.  
+This function may be used if some custom props need to be injected into the container component, such as an initial Redux state.  
+This function should be used instead of the `Container` property when returning from `onRender`.  
+For example you may want to render the conatiner as follows:
+
+```js
+  // index.js
+  import Koa from 'koa';
+  import reactrouter from 'koa-react-router';
+  // ...other imports
+
+  const app = new Koa();
+
+  const state = // Create state.
+
+  app.use(reactrouter({
+    routes,
+    onRender: (ctx) => ({
+      containerRenderer: (view) =>
+      <html lang="en">
+        <head>
+          <script dangerouslySetInnerHTML={{ __html: state}} />
+        </head>
+        <body>
+          <p>hello container</p>
+          <div dangerouslySetInnerHTML={{ __html: view }} />
+        </body>
+      </html>
+    })
+  }));
+```
+
+The final page render would look something like:
+
+```html
+<html lang="en">
+  <head>
+    <script>//State config</script>
+  </head>
+  <body>
+    <p>hello container</p>
+    <div>
+      <!-- View html in here -->
+    </div>
+  </body>
+</html>
+```

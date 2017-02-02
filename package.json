@@ -64,7 +64,7 @@
   "homepage": "https://github.com/afenton90/koa-react-router#readme",
   "ava": {
     "files": [
-      "*.spec.js"
+      "index.spec.js"
     ],
     "verbose": true,
     "babel": "inherit",
@@ -75,7 +75,7 @@
   },
   "nyc": {
     "exclude": [
-      "*.spec.js"
+      "index.spec.js"
     ]
   }
 }

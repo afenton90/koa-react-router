@@ -2,7 +2,7 @@ import test from 'ava';
 import sinon from 'sinon';
 import React from 'react';
 import { Route, IndexRoute, Redirect } from 'react-router';
-import koaReactRouter from './';
+import koaReactRouter from './index';
 
 const Container = ({ children }) =>
   <html lang="en" >
@@ -151,3 +151,34 @@ test('handles not found with callback', async t => {
   t.false(callbacks.onError.called);
   t.falsy(ctx.response.body);
 });
+
+test('handles containerRenderer in onRender', async t => {
+  const ctx = {
+    request: { url: '/away' },
+    response: {}
+  };
+  const next = sinon.spy();
+
+  const message = 'Hello I am the message';
+  const onRender = () => ({
+    containerRenderer: (view) =>
+      <html lang="en">
+        <body>
+          <p>hello container from renderer</p>
+          <p>{message}</p>
+          <div dangerouslySetInnerHTML={{ __html: view }} />
+        </body>
+      </html>
+  });
+
+  await koaReactRouter({
+    routes,
+    onRender
+  })(ctx, next);
+
+  t.true(ctx.response.body.includes('hello container from renderer'));
+  t.true(ctx.response.body.includes('I am away in a route'));
+  t.true(ctx.response.body.includes(message));
+  t.true(next.calledOnce);
+});
+
