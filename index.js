@@ -32,7 +32,7 @@ const server = ({
                 </RouterContainer>
               ));
             } catch (e) {
-              onError(e);
+              onError(ctx, e);
             }
           } else {
             view = renderToString(<RouterContext {...props} />);
@@ -43,7 +43,7 @@ const server = ({
             try {
               rendered = renderToStaticMarkup(containerRenderer(view));
             } catch (e) {
-              onError(e);
+              onError(ctx, e);
             }
           } else {
             try {
@@ -53,7 +53,7 @@ const server = ({
                 </Container>
               );
             } catch (e) {
-              onError(e);
+              onError(ctx, e);
             }
           }
           ctx.response.body = rendered;

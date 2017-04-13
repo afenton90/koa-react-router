@@ -202,6 +202,8 @@ test('handles RouterContainer rendering errors', async t => {
   })(ctx, next);
 
   t.true(callbacks.onError.called);
+  t.deepEqual(callbacks.onError.args[0][0], ctx);
+  t.is(typeof callbacks.onError.args[0][1].message, 'string');
   t.true(next.calledOnce);
 });
 
@@ -226,6 +228,8 @@ test('handles containerRenderer rendering errors', async t => {
   })(ctx, next);
 
   t.true(callbacks.onError.called);
+  t.deepEqual(callbacks.onError.args[0][0], ctx);
+  t.is(typeof callbacks.onError.args[0][1].message, 'string');
   t.true(next.calledOnce);
 });
 
@@ -247,5 +251,7 @@ test('handles containerRenderer rendering errors', async t => {
   })(ctx, next);
 
   t.true(callbacks.onError.called);
+  t.deepEqual(callbacks.onError.args[0][0], ctx);
+  t.is(typeof callbacks.onError.args[0][1].message, 'string');
   t.true(next.calledOnce);
 });
