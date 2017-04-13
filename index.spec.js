@@ -182,3 +182,25 @@ test('handles containerRenderer in onRender', async t => {
   t.true(next.calledOnce);
 });
 
+test('handles RouterContainer rendering errors', async t => {
+  const callbacks = mockCallbacks();
+  const ctx = {
+    request: { url: '/' },
+    response: {}
+  };
+  const next = sinon.spy();
+  const RouterContainer = ({ children, nothing }) =>
+    <div id="some-container">
+      {children}
+      {nothing.length}
+    </div>;
+
+  await koaReactRouter({
+    routes,
+    ...callbacks,
+    onRender: () => ({ Container, RouterContainer })
+  })(ctx, next);
+
+  t.true(callbacks.onError.called);
+  t.true(next.calledOnce);
+});

@@ -24,11 +24,15 @@ const server = ({
           } = await onRender(ctx);
           let view;
           if (RouterContainer) {
-            view = renderToString((
-              <RouterContainer>
-                <RouterContext {...props} />
-              </RouterContainer>
-            ));
+            try {
+              view = renderToString((
+                <RouterContainer>
+                  <RouterContext {...props} />
+                </RouterContainer>
+              ));
+            } catch (e) {
+              onError(e);
+            }
           } else {
             view = renderToString(<RouterContext {...props} />);
           }
