@@ -22,6 +22,7 @@ const server = ({
             RouterContainer,
             containerRenderer
           } = await onRender(ctx);
+
           let view;
           if (RouterContainer) {
             try {
@@ -39,15 +40,22 @@ const server = ({
 
           let rendered;
           if (containerRenderer) {
-            rendered = renderToStaticMarkup(containerRenderer(view));
+            try {
+              rendered = renderToStaticMarkup(containerRenderer(view));
+            } catch (e) {
+              onError(e);
+            }
           } else {
-            rendered = renderToStaticMarkup(
-              <Container>
-                <div dangerouslySetInnerHTML={{ __html: view }} />
-              </Container>
-            );
+            try {
+              rendered = renderToStaticMarkup(
+                <Container>
+                  <div dangerouslySetInnerHTML={{ __html: view }} />
+                </Container>
+              );
+            } catch (e) {
+              onError(e);
+            }
           }
-
           ctx.response.body = rendered;
         }
         await next();
