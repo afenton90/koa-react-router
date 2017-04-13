@@ -234,7 +234,7 @@ test('handles containerRenderer rendering errors', async t => {
 });
 
 
-test('handles containerRenderer rendering errors', async t => {
+test('handles Container rendering errors', async t => {
   const callbacks = mockCallbacks();
   const ctx = {
     request: { url: '/away' },
