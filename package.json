@@ -1,6 +1,6 @@
 {
   "name": "koa-react-router",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "react-router middleware for koa 2.",
   "main": "lib/index.js",
   "files": [
