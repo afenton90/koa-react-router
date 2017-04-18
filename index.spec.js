@@ -182,3 +182,76 @@ test('handles containerRenderer in onRender', async t => {
   t.true(next.calledOnce);
 });
 
+test('handles RouterContainer rendering errors', async t => {
+  const callbacks = mockCallbacks();
+  const ctx = {
+    request: { url: '/' },
+    response: {}
+  };
+  const next = sinon.spy();
+  const RouterContainer = ({ children, nothing }) =>
+    <div id="some-container">
+      {children}
+      {nothing.length}
+    </div>;
+
+  await koaReactRouter({
+    routes,
+    ...callbacks,
+    onRender: () => ({ Container, RouterContainer })
+  })(ctx, next);
+
+  t.true(callbacks.onError.called);
+  t.deepEqual(callbacks.onError.args[0][0], ctx);
+  t.is(typeof callbacks.onError.args[0][1].message, 'string');
+  t.true(next.calledOnce);
+});
+
+test('handles containerRenderer rendering errors', async t => {
+  const callbacks = mockCallbacks();
+  const ctx = {
+    request: { url: '/away' },
+    response: {}
+  };
+  const next = sinon.spy();
+  const containerRenderer = (view, nothing) =>
+    <html lang="en">
+      <body>
+        <p>{nothing()}</p>
+      </body>
+    </html>;
+
+  await koaReactRouter({
+    ...callbacks,
+    routes,
+    onRender: () => ({ containerRenderer })
+  })(ctx, next);
+
+  t.true(callbacks.onError.called);
+  t.deepEqual(callbacks.onError.args[0][0], ctx);
+  t.is(typeof callbacks.onError.args[0][1].message, 'string');
+  t.true(next.calledOnce);
+});
+
+
+test('handles Container rendering errors', async t => {
+  const callbacks = mockCallbacks();
+  const ctx = {
+    request: { url: '/away' },
+    response: {}
+  };
+
+  const next = sinon.spy();
+  const Container = ({ nothing }) => <p>{nothing()}</p>;
+
+  await koaReactRouter({
+    ...callbacks,
+    routes,
+    onRender: () => ({ Container })
+  })(ctx, next);
+
+  t.true(callbacks.onError.called);
+  t.deepEqual(callbacks.onError.args[0][0], ctx);
+  t.is(typeof callbacks.onError.args[0][1].message, 'string');
+  t.true(next.calledOnce);
+});

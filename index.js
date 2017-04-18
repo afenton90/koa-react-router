@@ -22,28 +22,40 @@ const server = ({
             RouterContainer,
             containerRenderer
           } = await onRender(ctx);
+
           let view;
           if (RouterContainer) {
-            view = renderToString((
-              <RouterContainer>
-                <RouterContext {...props} />
-              </RouterContainer>
-            ));
+            try {
+              view = renderToString((
+                <RouterContainer>
+                  <RouterContext {...props} />
+                </RouterContainer>
+              ));
+            } catch (e) {
+              onError(ctx, e);
+            }
           } else {
             view = renderToString(<RouterContext {...props} />);
           }
 
           let rendered;
           if (containerRenderer) {
-            rendered = renderToStaticMarkup(containerRenderer(view));
+            try {
+              rendered = renderToStaticMarkup(containerRenderer(view));
+            } catch (e) {
+              onError(ctx, e);
+            }
           } else {
-            rendered = renderToStaticMarkup(
-              <Container>
-                <div dangerouslySetInnerHTML={{ __html: view }} />
-              </Container>
-            );
+            try {
+              rendered = renderToStaticMarkup(
+                <Container>
+                  <div dangerouslySetInnerHTML={{ __html: view }} />
+                </Container>
+              );
+            } catch (e) {
+              onError(ctx, e);
+            }
           }
-
           ctx.response.body = rendered;
         }
         await next();
