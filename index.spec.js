@@ -1,4 +1,3 @@
-import test from 'ava';
 import sinon from 'sinon';
 import React from 'react';
 import { Route, IndexRoute, Redirect } from 'react-router';
@@ -33,7 +32,7 @@ const mockCallbacks = () => ({
   onRender: () => ({ Container })
 });
 
-test('renders Container', async t => {
+test('renders Container', async () => {
   const callbacks = mockCallbacks();
   const ctx = {
     request: {
@@ -48,12 +47,12 @@ test('renders Container', async t => {
     ...callbacks
   })(ctx, next);
 
-  t.true(ctx.response.body.includes('<title>Koa React-Router Title</title>'));
-  t.true(ctx.response.body.includes('<p>Stuff in body</p>'));
-  t.true(next.calledOnce);
+  expect(ctx.response.body.includes('<title>Koa React-Router Title</title>')).toBe(true);
+  expect(ctx.response.body.includes('<p>Stuff in body</p>')).toBe(true);
+  expect(next.calledOnce).toBe(true);
 });
 
-test('renders RouterContainer', async t => {
+test('renders RouterContainer', async () => {
   const callbacks = mockCallbacks();
   const ctx = {
     request: { url: '/' },
@@ -71,12 +70,12 @@ test('renders RouterContainer', async t => {
     onRender: () => ({ Container, RouterContainer })
   })(ctx, next);
 
-  t.true(ctx.response.body.includes('id="some-container"'));
-  t.true(ctx.response.body.includes('I am Home'));
-  t.true(next.calledOnce);
+  expect(ctx.response.body.includes('id="some-container"')).toBe(true);
+  expect(ctx.response.body.includes('I am Home')).toBe(true);
+  expect(next.calledOnce).toBe(true);
 });
 
-test('matches IndexRoute', async t => {
+test('matches IndexRoute', async () => {
   const callbacks = mockCallbacks();
   const ctx = {
     request: {
@@ -91,12 +90,12 @@ test('matches IndexRoute', async t => {
     ...callbacks
   })(ctx, next);
 
-  t.true(ctx.response.body.includes('I am Home'));
-  t.false(ctx.response.body.includes('I am away in a route'));
-  t.true(next.calledOnce);
+  expect(ctx.response.body.includes('I am Home')).toBe(true);
+  expect(ctx.response.body.includes('I am away in a route')).toBe(false);
+  expect(next.calledOnce).toBe(true);
 });
 
-test('matches Route', async t => {
+test('matches Route', async () => {
   const callbacks = mockCallbacks();
   const ctx = {
     request: { url: '/away' },
@@ -109,12 +108,12 @@ test('matches Route', async t => {
     ...callbacks
   })(ctx, next);
 
-  t.true(ctx.response.body.includes('I am away in a route'));
-  t.false(ctx.response.body.includes('I am Home'));
-  t.true(next.calledOnce);
+  expect(ctx.response.body.includes('I am away in a route')).toBe(true);
+  expect(ctx.response.body.includes('I am Home')).toBe(false);
+  expect(next.calledOnce).toBe(true);
 });
 
-test('handles redirect with callback', async t => {
+test('handles redirect with callback', async () => {
   const callbacks = mockCallbacks();
   const ctx = {
     request: { url: '/home' },
@@ -127,13 +126,13 @@ test('handles redirect with callback', async t => {
     ...callbacks
   })(ctx, next);
 
-  t.true(callbacks.onRedirect.calledOnce);
-  t.false(callbacks.onError.called);
-  t.false(callbacks.onNotFound.called);
-  t.falsy(ctx.response.body);
+  expect(callbacks.onRedirect.calledOnce).toBe(true);
+  expect(callbacks.onError.called).toBe(false);
+  expect(callbacks.onNotFound.called).toBe(false);
+  expect(ctx.response.body).toBeFalsy();
 });
 
-test('handles not found with callback', async t => {
+test('handles not found with callback', async () => {
   const callbacks = mockCallbacks();
   const ctx = {
     request: { url: '/something-wrong' },
@@ -146,13 +145,13 @@ test('handles not found with callback', async t => {
     ...callbacks
   })(ctx, next);
 
-  t.true(callbacks.onNotFound.calledOnce);
-  t.false(callbacks.onRedirect.called);
-  t.false(callbacks.onError.called);
-  t.falsy(ctx.response.body);
+  expect(callbacks.onNotFound.calledOnce).toBe(true);
+  expect(callbacks.onRedirect.called).toBe(false);
+  expect(callbacks.onError.called).toBe(false);
+  expect(ctx.response.body).toBeFalsy();
 });
 
-test('handles containerRenderer in onRender', async t => {
+test('handles containerRenderer in onRender', async () => {
   const ctx = {
     request: { url: '/away' },
     response: {}
@@ -176,13 +175,13 @@ test('handles containerRenderer in onRender', async t => {
     onRender
   })(ctx, next);
 
-  t.true(ctx.response.body.includes('hello container from renderer'));
-  t.true(ctx.response.body.includes('I am away in a route'));
-  t.true(ctx.response.body.includes(message));
-  t.true(next.calledOnce);
+  expect(ctx.response.body.includes('hello container from renderer')).toBe(true);
+  expect(ctx.response.body.includes('I am away in a route')).toBe(true);
+  expect(ctx.response.body.includes(message)).toBe(true);
+  expect(next.calledOnce).toBe(true);
 });
 
-test('handles RouterContainer rendering errors', async t => {
+test('handles RouterContainer rendering errors', async () => {
   const callbacks = mockCallbacks();
   const ctx = {
     request: { url: '/' },
@@ -201,13 +200,13 @@ test('handles RouterContainer rendering errors', async t => {
     onRender: () => ({ Container, RouterContainer })
   })(ctx, next);
 
-  t.true(callbacks.onError.called);
-  t.deepEqual(callbacks.onError.args[0][0], ctx);
-  t.is(typeof callbacks.onError.args[0][1].message, 'string');
-  t.true(next.calledOnce);
+  expect(callbacks.onError.called).toBe(true);
+  expect(callbacks.onError.args[0][0]).toEqual(ctx);
+  expect(typeof callbacks.onError.args[0][1].message).toBe('string');
+  expect(next.calledOnce).toBe(true);
 });
 
-test('handles containerRenderer rendering errors', async t => {
+test('handles containerRenderer rendering errors', async () => {
   const callbacks = mockCallbacks();
   const ctx = {
     request: { url: '/away' },
@@ -227,14 +226,14 @@ test('handles containerRenderer rendering errors', async t => {
     onRender: () => ({ containerRenderer })
   })(ctx, next);
 
-  t.true(callbacks.onError.called);
-  t.deepEqual(callbacks.onError.args[0][0], ctx);
-  t.is(typeof callbacks.onError.args[0][1].message, 'string');
-  t.true(next.calledOnce);
+  expect(callbacks.onError.called).toBe(true);
+  expect(callbacks.onError.args[0][0]).toEqual(ctx);
+  expect(typeof callbacks.onError.args[0][1].message).toBe('string');
+  expect(next.calledOnce).toBe(true);
 });
 
 
-test('handles Container rendering errors', async t => {
+test('handles Container rendering errors', async () => {
   const callbacks = mockCallbacks();
   const ctx = {
     request: { url: '/away' },
@@ -242,16 +241,16 @@ test('handles Container rendering errors', async t => {
   };
 
   const next = sinon.spy();
-  const Container = ({ nothing }) => <p>{nothing()}</p>;
+  const RenderContainer = ({ nothing }) => <p>{nothing()}</p>;
 
   await koaReactRouter({
     ...callbacks,
     routes,
-    onRender: () => ({ Container })
+    onRender: () => ({ Container: RenderContainer })
   })(ctx, next);
 
-  t.true(callbacks.onError.called);
-  t.deepEqual(callbacks.onError.args[0][0], ctx);
-  t.is(typeof callbacks.onError.args[0][1].message, 'string');
-  t.true(next.calledOnce);
+  expect(callbacks.onError.called).toBe(true);
+  expect(callbacks.onError.args[0][0]).toEqual(ctx);
+  expect(typeof callbacks.onError.args[0][1].message).toBe('string');
+  expect(next.calledOnce).toBe(true);
 });
