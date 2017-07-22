@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import React from 'react';
-import { Route, IndexRoute, Redirect } from 'react-router';
+import { Route, Redirect } from 'react-router';
 import koaReactRouter from './index';
 
 const Container = ({ children }) =>
@@ -17,16 +17,14 @@ const Container = ({ children }) =>
 // Routes
 const Index = () => <div>I am Home</div>;
 const Away = () => <div>I am away in a route</div>;
-const routes = (
-  <Route path="/">
-    <IndexRoute component={Index} />
-    <Route path="/away" component={Away} />
-    <Redirect from="/home" to="/away" />
-  </Route>
-);
+const App = () =>
+  <div>
+    <Route path="/" component={Index} exact />
+    <Route path="/away" component={Away} exact />
+  </div>;
 
 const mockCallbacks = () => ({
-  onError: sinon.spy(),
+  onError: sinon.stub(),
   onRedirect: sinon.spy(),
   onNotFound: sinon.spy(),
   onRender: () => ({ Container })
@@ -43,7 +41,7 @@ test('renders Container', async () => {
   const next = sinon.spy();
 
   await koaReactRouter({
-    routes,
+    App,
     ...callbacks
   })(ctx, next);
 
@@ -65,7 +63,7 @@ test('renders RouterContainer', async () => {
     </div>;
 
   await koaReactRouter({
-    routes,
+    App,
     ...callbacks,
     onRender: () => ({ Container, RouterContainer })
   })(ctx, next);
@@ -86,7 +84,7 @@ test('matches IndexRoute', async () => {
   const next = sinon.spy();
 
   await koaReactRouter({
-    routes,
+    App,
     ...callbacks
   })(ctx, next);
 
@@ -104,7 +102,7 @@ test('matches Route', async () => {
   const next = sinon.spy();
 
   await koaReactRouter({
-    routes,
+    App,
     ...callbacks
   })(ctx, next);
 
@@ -121,8 +119,15 @@ test('handles redirect with callback', async () => {
   };
   const next = sinon.spy();
 
+  const RedirectApp = () =>
+    <div>
+      <Route path="/away" component={Away} />
+      <Route path="/home" component={Index} />
+      <Redirect to="/home" />
+    </div>;
+
   await koaReactRouter({
-    routes,
+    App: RedirectApp,
     ...callbacks
   })(ctx, next);
 
@@ -141,7 +146,7 @@ test('handles not found with callback', async () => {
   const next = sinon.spy();
 
   await koaReactRouter({
-    routes,
+    App,
     ...callbacks
   })(ctx, next);
 
@@ -171,7 +176,7 @@ test('handles containerRenderer in onRender', async () => {
   });
 
   await koaReactRouter({
-    routes,
+    App,
     onRender
   })(ctx, next);
 
@@ -195,7 +200,7 @@ test('handles RouterContainer rendering errors', async () => {
     </div>;
 
   await koaReactRouter({
-    routes,
+    App,
     ...callbacks,
     onRender: () => ({ Container, RouterContainer })
   })(ctx, next);
@@ -222,7 +227,7 @@ test('handles containerRenderer rendering errors', async () => {
 
   await koaReactRouter({
     ...callbacks,
-    routes,
+    App,
     onRender: () => ({ containerRenderer })
   })(ctx, next);
 
@@ -245,7 +250,7 @@ test('handles Container rendering errors', async () => {
 
   await koaReactRouter({
     ...callbacks,
-    routes,
+    App,
     onRender: () => ({ Container: RenderContainer })
   })(ctx, next);
 

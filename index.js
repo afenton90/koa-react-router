@@ -1,9 +1,9 @@
 import React from 'react';
 import { renderToString, renderToStaticMarkup } from 'react-dom/server';
-import { match, RouterContext } from 'react-router';
+import { StaticRouter } from 'react-router';
 
 const server = ({
-  routes,
+  App,
   onError,
   onRedirect,
   onNotFound,
@@ -11,56 +11,41 @@ const server = ({
 }) =>
   async (ctx, next) => {
     const location = ctx.request.url;
-    await match({ routes, location },
-      async (err, redirect, props) => {
-        if (redirect) await onRedirect(ctx, redirect);
-        else if (err) await onError(ctx, err);
-        else if (!props) await onNotFound(ctx);
-        else {
-          const {
-            Container,
-            RouterContainer,
-            containerRenderer
-          } = await onRender(ctx);
+    const routerContext = {};
+    try {
+      const view = renderToString(
+        <StaticRouter
+          location={location}
+          context={routerContext}
+        >
+          <App />
+        </StaticRouter>
+      );
 
-          let view;
-          if (RouterContainer) {
-            try {
-              view = renderToString((
-                <RouterContainer>
-                  <RouterContext {...props} />
-                </RouterContainer>
-              ));
-            } catch (e) {
-              onError(ctx, e);
-            }
-          } else {
-            view = renderToString(<RouterContext {...props} />);
-          }
-
-          let rendered;
-          if (containerRenderer) {
-            try {
-              rendered = renderToStaticMarkup(containerRenderer(view));
-            } catch (e) {
-              onError(ctx, e);
-            }
-          } else {
-            try {
-              rendered = renderToStaticMarkup(
-                <Container>
-                  <div dangerouslySetInnerHTML={{ __html: view }} />
-                </Container>
-              );
-            } catch (e) {
-              onError(ctx, e);
-            }
-          }
-          ctx.response.body = rendered;
+      if (routerContext.url) await onRedirect(ctx, routerContext.url);
+      else {
+        const {
+          Container,
+          containerRenderer
+        } = await onRender(ctx);
+        
+        let rendered;
+        if (containerRenderer) {
+          rendered = renderToStaticMarkup(containerRenderer(view));
+        } else {
+          rendered = renderToStaticMarkup(
+            <Container>
+              <div dangerouslySetInnerHTML={{ __html: view }} />
+            </Container>
+          );
         }
-        await next();
+        ctx.response.body = rendered;
       }
-    );
+    } catch (err) {
+      await onError(ctx, err);
+    } finally {
+      await next();
+    }
   };
 
 export default server;
