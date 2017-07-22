@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "test": "BABEL_ENV=test jest",
+    "lint": "eslint index.js",
     "build": "babel index.js -d lib",
     "prepublish": "npm run build"
   },
