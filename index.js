@@ -6,7 +6,6 @@ const server = ({
   App,
   onError,
   onRedirect,
-  onNotFound,
   onRender
 }) =>
   async (ctx, next) => {
@@ -28,7 +27,7 @@ const server = ({
           Container,
           containerRenderer
         } = await onRender(ctx);
-        
+
         let rendered;
         if (containerRenderer) {
           rendered = renderToStaticMarkup(containerRenderer(view));
@@ -39,6 +38,8 @@ const server = ({
             </Container>
           );
         }
+
+        ctx.response.status = routerContext.status || 200;
         ctx.response.body = rendered;
       }
     } catch (err) {
