@@ -1,6 +1,6 @@
 # koa-react-router
 
-koa 2 middleware for React server side rendering and routing with [react-router](https://github.com/ReactTraining/react-router).
+koa 2 middleware for React server side rendering and routing with [react-router 4](https://github.com/ReactTraining/react-router).
 
 ## Usage
 
@@ -19,18 +19,16 @@ To install `koa-react-router`:
   // index.js
   import Koa from 'koa';
   import reactrouter from 'koa-react-router';
-  import routes from './routes';
+  import App from './App';
   import Container from './containers/PageContainer';
-  import RouterContainer from './containers/RouterContainer';
 
   const app = new Koa();
 
   app.use(reactrouter({
-    routes,
+    App,
     onError: (ctx, err) => console.log('I Have failed!!!!'),
     onRedirect: (ctx, redirect) => console.log('I have redirected!'),
-    onNotFound: (ctx) => console.log('Not Found!!!'),
-    onRender: (ctx) => ({ Container, RouterContainer })
+    onRender: (ctx) => ({ Container })
   }));
 ```
 
@@ -38,60 +36,54 @@ To install `koa-react-router`:
 
 `koa-react-router` requires the following parameters:
 
-### routes
+### `App`
 
-The `react-router` routes to use for the application. For example:
+The `App` config prop should be a react component that contains React Router 4 `Route` to be rendered.
+For example:
 ```jsx
-  // routes.js
+  // App.js
   import React from 'react';
-  import { Route, IndexRoute } from 'react-router';
+  import { Route } from 'react-router';
   import Home from '../containers/Home';
   import Article from '../containers/Article';
 
-  module.exports = (
-    <Route path="/">
-      <IndexRoute component={Home} />
-      <Route path="/article" component={Article} />
-    </Route>
-  );
+ const App = () =>
+    <div>
+      <h1>This is my App!</h1>
+      <Route path="/" component={Home} exact />
+      <Route path="/article" component={Article} exact />
+    </div>;
 
   // index.js
   // ...imports
-  import routes from './routes';
+  import App from './App';
 
   // ... koa app setup
   app.use(reactrouter({
-    routes: routes,
+    App,
     // Other callbacks
   }));  
 ```
 
-### onError
+### `onError`
 
-Callback function called when an error occurs whilst route matching.  
+Callback function called when an error occurs whilst route matching or rendering.  
 The function accepts the following parameters:
 
 * `ctx` - The Koa [`Context`](http://koajs.com/#context) object.
-* `err` - The error that occured whilst route matching. See [react-router](https://github.com/ReactTraining/react-router/blob/master/docs/API.md#match-routes-location-history-options--cb) docs for more details.
+* `err` - The error that was caught when matching routes.
 
-### onRedirect
+### `onRedirect`
 
-Callback function called if the route is match to a redirect.  
+Callback function called if a `Redirect` route is matched.  
 The function accepts the following parameters:
 
 * `ctx` - The Koa [`Context`](http://koajs.com/#context) object.
-* `redirect` - The Location object for the route. See [react-router](https://github.com/ReactTraining/react-router/blob/master/docs/API.md#match-routes-location-history-options--cb) docs for more details.
+* `redirectUrl` - The url to redirect to.
 
-### onNotFound
+### `onRender`
 
-Callback function called if no route matches the requested url.  
-The function accepts the following parameters:
-
-* `ctx` - The Koa [`Context`](http://koajs.com/#context) object.
-
-### onRender
-
-Callback function called before rendering a route.  
+Callback function called before sending a response to the client.
 This function must be supplied, and must return an object that contains the following property:
 
 #### `Container`
@@ -126,77 +118,26 @@ This would then be supplied to `koa-react-router` via the `onRender` callback li
   // index.js
   import Koa from 'koa';
   import reactrouter from 'koa-react-router';
-  import routes from './routes';
+  import App from './App';
   import Container from './containers/Container';
 
   const app = new Koa();
 
   app.use(reactrouter({
-    routes,
+    App,
     onRender: (ctx) => ({ Container })
   }));
 ```
 
 As well as the `Container` property this callback can optionally return:
 
-#### `RouterContainer`
-
-Optional React component that is immediatley wrappered around the routes.
-If supplied this component will sit between the `Container` component and the `routes`.  
-For example:
-
-```jsx
-  <Container>
-    <RouterContainer>
-      {routes}
-    </RouterContainer>
-  </Container>
-```
-As such this component is rendered using `renderToString` meaning it has the react attributes it would have when rendered in a browser.  
-The component must accept the `children` prop and insert it when rendered.
-Full example:
-
-```jsx
-  // ./containers/RouterContainer
-  import React from 'react';
-
-  const RouterContainer = (props) =>
-    <div>
-      <p>Hello routes</p>
-      {props.children}
-    </div>;
-
-  export default RouterContainer;
-```
-
-This would then be supplied to `koa-react-router` via the `onRender` callback like so:
-
-```js
-  // index.js
-  import Koa from 'koa';
-  import reactrouter from 'koa-react-router';
-  import routes from './routes';
-  import Container from './containers/Container';
-  import RouterContainer from './containers/RouterContainer';
-
-  const app = new Koa();
-
-  app.use(reactrouter({
-    routes,
-    onRender: (ctx) => ({ Container, RouterContainer })
-  }));
-```
-
-This component could also be a `Provider` containing a `redux` store.
-A full example when using redux is coming soon.
-
 #### `containerRenderer`
 
 Optional function for handling the rendering of a container component.  
-This function has one argument which is `view`. This argument is the currently rendered view from the Router.  
+This function has one argument which is `view`. This argument is the currently rendered view of the app.  
 This function may be used if some custom props need to be injected into the container component, such as an initial Redux state.  
 This function should be used instead of the `Container` property when returning from `onRender`.  
-For example you may want to render the conatiner as follows:
+For example you may want to render the container as follows:
 
 ```js
   // index.js
@@ -209,7 +150,7 @@ For example you may want to render the conatiner as follows:
   const state = // Create state.
 
   app.use(reactrouter({
-    routes,
+    App,
     onRender: (ctx) => ({
       containerRenderer: (view) =>
       <html lang="en">
@@ -240,3 +181,67 @@ The final page render would look something like:
   </body>
 </html>
 ```
+
+## Router Context
+React Router 4 added support for a [static router context](https://reacttraining.com/react-router/web/example/static-router) this context can be used in your application, to pass values from your router to other middleware and drive behaviour for routes.  
+`koa-react-router` makes this context available on the koa `ctx` in the following location:  
+```js
+ctx.state.routerContext;
+```
+
+One example of using this context is setting a `status` in the route context so a later middleware can set that as this response code. 
+The common use case of status is already taken care of. So if one of your routes sets a `status` prop whilst rendering that will be set as the response status See [Not found](#FAQ) in the FAQ section for an example.  
+Use the `routerContext` for whatever you want in your app, some common recipes will be added to this repo at a later date.
+
+## FAQ
+
+This release includes some deprecated props. As React Router has come with some major changes so has `koa-react-router`.
+
+### No more routes prop ?
+The `routes` prop has gone in favour of the `App` config prop. Where you would have passed in your static routes before you can now pass in your `App` component that contains the React Router routes. For example:
+
+```jsx
+// App.js
+  import React from 'react';
+  import { Route } from 'react-router';
+  import Home from '../containers/Home';
+  import Article from '../containers/Article';
+
+  const App = () =>
+    <div>
+      <h1>This is my App!</h1>
+      <Route path="/" component={Home} exact />
+      <Route path="/article" component={Article} exact />
+    </div>;
+```
+React Router 4 gives you the flexibility to define your routes wherever you want in your app, and so does `koa-react-router`.
+
+### What do I do with routes that are not found ?
+The previous version of `koa-react-router` supported a `onNotFound` callback. This has been deprecated in favour of defining a `status` prop on the React Router static context and using a `Switch` component in your app. For example, our `App` component may be written as:
+
+```jsx
+  import React from 'react';
+  import { Route, Switch } from 'react-router';
+  import Home from '../containers/Home';
+  import Article from '../containers/Article';
+
+  const NotFound = ({ status }) =>
+    <Route
+      render={({ staticContext }) => {
+        if (staticContext) staticContext.status = status;
+        return <div>This route has not been found Soz!</div>;
+      }}
+    />;
+
+  const App = () =>
+    <div>
+      <h1>This is my App!</h1>
+      <Switch>
+        <Route path="/" component={Home} exact />
+        <Route path="/article" component={Article} exact />
+        <NotFound status={404} />
+      </Switch>
+    </div>;
+```
+
+If not other routes are matched the `NotFound` component will be rendered, and `koa-react-router` will set the response code status.

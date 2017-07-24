@@ -9,9 +9,10 @@ const server = ({
   onRender
 }) =>
   async (ctx, next) => {
-    const location = ctx.request.url;
-    const routerContext = {};
     try {
+      const location = ctx.request.url;
+      const routerContext = {};
+
       const view = renderToString(
         <StaticRouter
           location={location}
@@ -20,6 +21,11 @@ const server = ({
           <App />
         </StaticRouter>
       );
+
+      ctx.state = {
+        ...ctx.state,
+        routerContext
+      };
 
       if (routerContext.url) await onRedirect(ctx, routerContext.url);
       else {
@@ -40,7 +46,10 @@ const server = ({
         }
 
         ctx.response.status = routerContext.status || 200;
-        ctx.response.body = rendered;
+        ctx.response.body = `
+          <!doctype html>
+          ${rendered}
+        `;
       }
     } catch (err) {
       await onError(ctx, err);

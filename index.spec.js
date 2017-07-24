@@ -26,7 +26,6 @@ const App = () =>
 const mockCallbacks = () => ({
   onError: sinon.stub(),
   onRedirect: sinon.spy(),
-  onNotFound: sinon.spy(),
   onRender: () => ({ Container })
 });
 
@@ -110,7 +109,6 @@ test('handles redirect with callback', async () => {
 
   expect(callbacks.onRedirect.calledOnce).toBe(true);
   expect(callbacks.onError.called).toBe(false);
-  expect(callbacks.onNotFound.called).toBe(false);
   expect(ctx.response.body).toBeFalsy();
 });
 
@@ -219,3 +217,52 @@ test('handles Container rendering errors', async () => {
   expect(typeof callbacks.onError.args[0][1].message).toBe('string');
   expect(next.calledOnce).toBe(true);
 });
+
+
+test('passes router context to koa context', async () => {
+  const callbacks = mockCallbacks();
+  const ctx = {
+    request: { url: '/something-wrong' },
+    response: {}
+  };
+  const next = sinon.spy();
+
+  const ContextApp = () =>
+    <Route
+      render={({ staticContext }) => {
+        staticContext.hello = 'world';
+        return <div />;
+      }}
+    />;
+
+  await koaReactRouter({
+    App: ContextApp,
+    ...callbacks
+  })(ctx, next);
+
+  expect(callbacks.onRedirect.called).toBe(false);
+  expect(callbacks.onError.called).toBe(false);
+  expect(ctx.response.body).toBeTruthy();
+  expect(ctx.state.routerContext).toEqual({
+    hello: 'world'
+  });
+});
+
+test('sets doctype in response body', async () => {
+  const callbacks = mockCallbacks();
+  const ctx = {
+    request: { url: '/away' },
+    response: {}
+  };
+  const next = sinon.spy();
+
+  await koaReactRouter({
+    App,
+    ...callbacks
+  })(ctx, next);
+
+  expect(ctx.response.body.includes('I am away in a route')).toBe(true);
+  expect(ctx.response.body.includes('<!doctype html>')).toBe(true);
+  expect(next.calledOnce).toBe(true);
+});
+
