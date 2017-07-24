@@ -2,6 +2,9 @@
 
 koa 2 middleware for React server side rendering and routing with [react-router 4](https://github.com/ReactTraining/react-router).
 
+> Looking for React Router 3 support see [v1](https://github.com/afenton90/koa-react-router/tree/v1.1.2) docs.
+Try React Router 4 though it's awesome!
+
 ## Usage
 
 To install `koa-react-router`:
