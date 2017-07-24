@@ -38,7 +38,7 @@ To install `koa-react-router`:
 
 ### `App`
 
-The `App` config prop should be a react component that contains React Router 4 `Route` to be rendered.
+The `App` config prop should be a react component that contains one or more React Router 4 `Route` components to be rendered.
 For example:
 ```jsx
   // App.js
@@ -190,7 +190,7 @@ ctx.state.routerContext;
 ```
 
 One example of using this context is setting a `status` in the route context so a later middleware can set that as this response code. 
-The common use case of status is already taken care of. So if one of your routes sets a `status` prop whilst rendering that will be set as the response status See [Not found](#FAQ) in the FAQ section for an example.  
+The common use case of status is already taken care of. So if one of your routes sets a `status` prop whilst rendering that will be set as the response status See [Not found](#what-do-i-do-with-routes-that-are-not-found-) in the FAQ section for an example.  
 Use the `routerContext` for whatever you want in your app, some common recipes will be added to this repo at a later date.
 
 ## FAQ
