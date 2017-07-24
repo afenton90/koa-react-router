@@ -5,7 +5,8 @@
     "plugins": [
         "react",
         "jsx-a11y",
-        "import"
+        "import",
+        "jest"
     ],
     "rules": {
         "comma-dangle": 0,
@@ -16,5 +17,8 @@
         "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
         "no-param-reassign": 0,
         "react/no-danger": 0
+    },
+    "env": {
+        "jest/globals": true
     }
 }

@@ -7,21 +7,21 @@
     "lib/index.js"
   ],
   "scripts": {
-    "test": "./node_modules/.bin/nyc --check-coverage --lines 95 --functions 95 --branches 90 ./node_modules/.bin/ava",
-    "coverage:report": "./node_modules/.bin/nyc report --reporter=html",
-    "build": "./node_modules/.bin/babel index.js -d lib",
+    "test": "BABEL_ENV=test jest",
+    "lint": "eslint index.js",
+    "build": "babel index.js -d lib",
     "prepublish": "npm run build"
   },
   "peerDependencies": {
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
-    "react-router": "^3.0.2"
+    "react-router": "^4.1.2"
   },
   "devDependencies": {
-    "ava": "^0.17.0",
     "babel-cli": "^6.18.0",
     "babel-core": "^6.17.0",
     "babel-eslint": "^7.0.0",
+    "babel-jest": "^20.0.3",
     "babel-plugin-transform-class-properties": "^6.16.0",
     "babel-plugin-transform-object-assign": "^6.8.0",
     "babel-polyfill": "^6.20.0",
@@ -32,13 +32,14 @@
     "eslint": "^3.12.2",
     "eslint-config-airbnb": "^13.0.0",
     "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jest": "^20.0.3",
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.8.0",
-    "nyc": "^10.1.2",
+    "jest": "^20.0.4",
     "react": "^15.4.2",
     "react-addons-test-utils": "^15.4.2",
     "react-dom": "^15.4.2",
-    "react-router": "^3.0.2",
+    "react-router": "^4.1.2",
     "sinon": "^1.17.6"
   },
   "repository": {
@@ -62,20 +63,22 @@
     "url": "https://github.com/afenton90/koa-react-router/issues"
   },
   "homepage": "https://github.com/afenton90/koa-react-router#readme",
-  "ava": {
-    "files": [
-      "index.spec.js"
+  "jest": {
+    "collectCoverageFrom": [
+      "index.js"
     ],
-    "verbose": true,
-    "babel": "inherit",
-    "require": [
-      "babel-register",
-      "babel-polyfill"
-    ]
-  },
-  "nyc": {
-    "exclude": [
-      "index.spec.js"
-    ]
+    "coverageReporters": [
+      "html",
+      "text"
+    ],
+    "collectCoverage": true,
+    "coverageThreshold": {
+      "global": {
+        "branches": 90,
+        "functions": 95,
+        "lines": 95,
+        "statements": 95
+      }
+    }
   }
 }
