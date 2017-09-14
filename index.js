@@ -45,7 +45,7 @@ const server = ({
           );
         }
 
-        ctx.response.status = routerContext.status || 200;
+        ctx.response.status = routerContext.status || ctx.response.status;
         ctx.response.body = `
           <!doctype html>
           ${rendered}

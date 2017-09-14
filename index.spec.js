@@ -139,6 +139,27 @@ test('handles status in router context', async () => {
   expect(ctx.response.status).toBe(404);
 });
 
+test('status is set from koa context is not set in router context', async () => {
+  const callbacks = mockCallbacks();
+  const status = 302;
+  const ctx = {
+    request: { url: '/something-wrong' },
+    response: {
+      status
+    }
+  };
+  const next = sinon.spy();
+
+  await koaReactRouter({
+    App,
+    ...callbacks
+  })(ctx, next);
+
+  expect(callbacks.onRedirect.called).toBe(false);
+  expect(callbacks.onError.called).toBe(false);
+  expect(ctx.response.status).toBe(status);
+});
+
 test('handles containerRenderer in onRender', async () => {
   const ctx = {
     request: { url: '/away' },
