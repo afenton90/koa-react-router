@@ -67,6 +67,14 @@ For example:
     // Other callbacks
   }));  
 ```
+### `preRender`
+
+Callback function called before rendering `App`. This callback should return a valid component.
+The function accepts the following parameters:
+
+* `component` - The `StaticRouter` wrapped around the `App`.
+
+> This callback could be used to wrap the `component` with any other higher-order component before it gets rendered
 
 ### `onError`
 

@@ -6,14 +6,15 @@ const server = ({
   App,
   onError,
   onRedirect,
-  onRender
+  onRender,
+  preRender = router => router
 }) =>
   async (ctx, next) => {
     try {
       const location = ctx.request.url;
       const routerContext = {};
 
-      const view = renderToString(
+      const router = (
         <StaticRouter
           location={location}
           context={routerContext}
@@ -21,6 +22,12 @@ const server = ({
           <App />
         </StaticRouter>
       );
+
+      const updatedComponent = await preRender(router);
+
+      if (!updatedComponent) throw new Error('No component returned from preRender');
+
+      const view = renderToString(updatedComponent);
 
       ctx.state = {
         ...ctx.state,

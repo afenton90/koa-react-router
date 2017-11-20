@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import React from 'react';
-import { Route, Redirect } from 'react-router';
+import { Route, Redirect, StaticRouter } from 'react-router';
 import koaReactRouter from './index';
 
 const Container = ({ children }) =>
@@ -287,3 +287,47 @@ test('sets doctype in response body', async () => {
   expect(next.calledOnce).toBe(true);
 });
 
+test('calls preRender with StaticRouter as argument', async () => {
+  const preRender = sinon.sandbox.spy();
+  const callbacks = mockCallbacks();
+  callbacks.preRender = preRender;
+
+  const ctx = {
+    request: { url: '/away' },
+    response: {}
+  };
+  const next = sinon.spy();
+
+  await koaReactRouter({
+    App,
+    ...callbacks
+  })(ctx, next);
+
+  const expected = (
+    <StaticRouter location={ctx.request.url} context={{}}>
+      <App />
+    </StaticRouter>
+  );
+  expect(preRender.calledOnce).toBe(true);
+  expect(JSON.stringify(preRender.args[0][0])).toBe(JSON.stringify(expected));
+});
+
+test('should throw an error if preRender callback doesn\'t return component', async () => {
+  const preRender = () => {};
+  const callbacks = mockCallbacks();
+  callbacks.preRender = preRender;
+
+  const ctx = {
+    request: { url: '/away' },
+    response: {}
+  };
+  const next = sinon.spy();
+
+  await koaReactRouter({
+    App,
+    ...callbacks
+  })(ctx, next);
+
+  expect(callbacks.onError.calledOnce).toBe(true);
+  expect(callbacks.onError.args[0][1].message).toEqual('No component returned from preRender');
+});
