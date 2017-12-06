@@ -1,4 +1,3 @@
-import sinon from 'sinon';
 import React from 'react';
 import { Route, Redirect, StaticRouter } from 'react-router';
 import koaReactRouter from './index';
@@ -24,8 +23,9 @@ const App = () =>
   </div>;
 
 const mockCallbacks = () => ({
-  onError: sinon.stub(),
-  onRedirect: sinon.spy(),
+  onError: jest.fn(),
+  onRedirect: jest.fn(),
+  next: jest.fn(),
   onRender: () => ({ Container })
 });
 
@@ -37,7 +37,7 @@ test('renders Container', async () => {
     },
     response: {}
   };
-  const next = sinon.spy();
+  const next = jest.fn();
 
   await koaReactRouter({
     App,
@@ -46,7 +46,7 @@ test('renders Container', async () => {
 
   expect(ctx.response.body.includes('<title>Koa React-Router Title</title>')).toBe(true);
   expect(ctx.response.body.includes('<p>Stuff in body</p>')).toBe(true);
-  expect(next.calledOnce).toBe(true);
+  expect(next).toHaveBeenCalled();
 });
 
 test('matches IndexRoute', async () => {
@@ -57,7 +57,7 @@ test('matches IndexRoute', async () => {
     },
     response: {}
   };
-  const next = sinon.spy();
+  const { next } = callbacks;
 
   await koaReactRouter({
     App,
@@ -66,7 +66,7 @@ test('matches IndexRoute', async () => {
 
   expect(ctx.response.body.includes('I am Home')).toBe(true);
   expect(ctx.response.body.includes('I am away in a route')).toBe(false);
-  expect(next.calledOnce).toBe(true);
+  expect(next).toHaveBeenCalled();
 });
 
 test('matches Route', async () => {
@@ -75,7 +75,7 @@ test('matches Route', async () => {
     request: { url: '/away' },
     response: {}
   };
-  const next = sinon.spy();
+  const { next } = callbacks;
 
   await koaReactRouter({
     App,
@@ -84,7 +84,7 @@ test('matches Route', async () => {
 
   expect(ctx.response.body.includes('I am away in a route')).toBe(true);
   expect(ctx.response.body.includes('I am Home')).toBe(false);
-  expect(next.calledOnce).toBe(true);
+  expect(next).toHaveBeenCalled();
 });
 
 test('handles redirect with callback', async () => {
@@ -93,7 +93,7 @@ test('handles redirect with callback', async () => {
     request: { url: '/home' },
     response: {}
   };
-  const next = sinon.spy();
+  const { next } = callbacks;
 
   const RedirectApp = () =>
     <div>
@@ -107,8 +107,8 @@ test('handles redirect with callback', async () => {
     ...callbacks
   })(ctx, next);
 
-  expect(callbacks.onRedirect.calledOnce).toBe(true);
-  expect(callbacks.onError.called).toBe(false);
+  expect(callbacks.onRedirect).toHaveBeenCalledTimes(1);
+  expect(callbacks.onError).not.toHaveBeenCalled();
   expect(ctx.response.body).toBeFalsy();
 });
 
@@ -118,7 +118,7 @@ test('handles status in router context', async () => {
     request: { url: '/something-wrong' },
     response: {}
   };
-  const next = sinon.spy();
+  const { next } = callbacks;
 
   const NotFound = () =>
     <Route
@@ -133,8 +133,8 @@ test('handles status in router context', async () => {
     ...callbacks
   })(ctx, next);
 
-  expect(callbacks.onRedirect.called).toBe(false);
-  expect(callbacks.onError.called).toBe(false);
+  expect(callbacks.onRedirect).not.toHaveBeenCalled();
+  expect(callbacks.onError).not.toHaveBeenCalled();
   expect(ctx.response.body).toBeTruthy();
   expect(ctx.response.status).toBe(404);
 });
@@ -148,15 +148,15 @@ test('status is set from koa context is not set in router context', async () => 
       status
     }
   };
-  const next = sinon.spy();
+  const { next } = callbacks;
 
   await koaReactRouter({
     App,
     ...callbacks
   })(ctx, next);
 
-  expect(callbacks.onRedirect.called).toBe(false);
-  expect(callbacks.onError.called).toBe(false);
+  expect(callbacks.onRedirect).not.toHaveBeenCalled();
+  expect(callbacks.onError).not.toHaveBeenCalled();
   expect(ctx.response.status).toBe(status);
 });
 
@@ -165,7 +165,7 @@ test('handles containerRenderer in onRender', async () => {
     request: { url: '/away' },
     response: {}
   };
-  const next = sinon.spy();
+  const next = jest.fn();
 
   const message = 'Hello I am the message';
   const onRender = () => ({
@@ -187,7 +187,7 @@ test('handles containerRenderer in onRender', async () => {
   expect(ctx.response.body.includes('hello container from renderer')).toBe(true);
   expect(ctx.response.body.includes('I am away in a route')).toBe(true);
   expect(ctx.response.body.includes(message)).toBe(true);
-  expect(next.calledOnce).toBe(true);
+  expect(next).toHaveBeenCalled();
 });
 
 test('handles containerRenderer rendering errors', async () => {
@@ -196,7 +196,7 @@ test('handles containerRenderer rendering errors', async () => {
     request: { url: '/away' },
     response: {}
   };
-  const next = sinon.spy();
+  const { next } = callbacks;
   const containerRenderer = (view, nothing) =>
     <html lang="en">
       <body>
@@ -210,10 +210,14 @@ test('handles containerRenderer rendering errors', async () => {
     onRender: () => ({ containerRenderer })
   })(ctx, next);
 
-  expect(callbacks.onError.called).toBe(true);
-  expect(callbacks.onError.args[0][0]).toEqual(ctx);
-  expect(typeof callbacks.onError.args[0][1].message).toBe('string');
-  expect(next.calledOnce).toBe(true);
+  expect(callbacks.onError).toHaveBeenCalled();
+  expect(callbacks.onError).toHaveBeenCalledWith(
+    ctx,
+    expect.objectContaining({
+      message: expect.any(String)
+    })
+  );
+  expect(next).toHaveBeenCalled();
 });
 
 
@@ -224,7 +228,7 @@ test('handles Container rendering errors', async () => {
     response: {}
   };
 
-  const next = sinon.spy();
+  const { next } = callbacks;
   const RenderContainer = ({ nothing }) => <p>{nothing()}</p>;
 
   await koaReactRouter({
@@ -233,10 +237,14 @@ test('handles Container rendering errors', async () => {
     onRender: () => ({ Container: RenderContainer })
   })(ctx, next);
 
-  expect(callbacks.onError.called).toBe(true);
-  expect(callbacks.onError.args[0][0]).toEqual(ctx);
-  expect(typeof callbacks.onError.args[0][1].message).toBe('string');
-  expect(next.calledOnce).toBe(true);
+  expect(callbacks.onError).toHaveBeenCalled();
+  expect(callbacks.onError).toHaveBeenCalledWith(
+    ctx,
+    expect.objectContaining({
+      message: expect.any(String)
+    })
+  );
+  expect(next).toHaveBeenCalled();
 });
 
 
@@ -246,7 +254,7 @@ test('passes router context to koa context', async () => {
     request: { url: '/something-wrong' },
     response: {}
   };
-  const next = sinon.spy();
+  const { next } = callbacks;
 
   const ContextApp = () =>
     <Route
@@ -261,8 +269,8 @@ test('passes router context to koa context', async () => {
     ...callbacks
   })(ctx, next);
 
-  expect(callbacks.onRedirect.called).toBe(false);
-  expect(callbacks.onError.called).toBe(false);
+  expect(callbacks.onRedirect).not.toHaveBeenCalled();
+  expect(callbacks.onError).not.toHaveBeenCalled();
   expect(ctx.response.body).toBeTruthy();
   expect(ctx.state.routerContext).toEqual({
     hello: 'world'
@@ -275,7 +283,7 @@ test('sets doctype in response body', async () => {
     request: { url: '/away' },
     response: {}
   };
-  const next = sinon.spy();
+  const { next } = callbacks;
 
   await koaReactRouter({
     App,
@@ -284,22 +292,22 @@ test('sets doctype in response body', async () => {
 
   expect(ctx.response.body.includes('I am away in a route')).toBe(true);
   expect(ctx.response.body.includes('<!doctype html>')).toBe(true);
-  expect(next.calledOnce).toBe(true);
+  expect(next).toHaveBeenCalled();
 });
 
 test('calls preRender with StaticRouter as argument', async () => {
-  const preRender = sinon.sandbox.spy();
+  const preRender = jest.fn();
   const callbacks = mockCallbacks();
-  callbacks.preRender = preRender;
 
   const ctx = {
     request: { url: '/away' },
     response: {}
   };
-  const next = sinon.spy();
+  const { next } = callbacks;
 
   await koaReactRouter({
     App,
+    preRender,
     ...callbacks
   })(ctx, next);
 
@@ -308,26 +316,31 @@ test('calls preRender with StaticRouter as argument', async () => {
       <App />
     </StaticRouter>
   );
-  expect(preRender.calledOnce).toBe(true);
-  expect(JSON.stringify(preRender.args[0][0])).toBe(JSON.stringify(expected));
+  expect(preRender).toHaveBeenCalled();
+  expect(preRender).toHaveBeenCalledWith(expected);
 });
 
 test('should throw an error if preRender callback doesn\'t return component', async () => {
   const preRender = () => {};
   const callbacks = mockCallbacks();
-  callbacks.preRender = preRender;
 
   const ctx = {
     request: { url: '/away' },
     response: {}
   };
-  const next = sinon.spy();
+  const { next } = callbacks;
 
   await koaReactRouter({
     App,
+    preRender,
     ...callbacks
   })(ctx, next);
 
-  expect(callbacks.onError.calledOnce).toBe(true);
-  expect(callbacks.onError.args[0][1].message).toEqual('No component returned from preRender');
+  expect(callbacks.onError).toHaveBeenCalled();
+  expect(callbacks.onError).toHaveBeenCalledWith(
+    expect.any(Object),
+    expect.objectContaining({
+      message: 'No component returned from preRender'
+    })
+  );
 });
