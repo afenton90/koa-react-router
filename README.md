@@ -1,9 +1,9 @@
 # koa-react-router
 
-koa 2 middleware for React server side rendering and routing with [react-router 4](https://github.com/ReactTraining/react-router).
+koa 2 middleware for React server side rendering and routing with [react-router 5](https://github.com/ReactTraining/react-router).
 
 > Looking for React Router 3 support see [v1](https://github.com/afenton90/koa-react-router/tree/v1.1.2) docs.
-Try React Router 4 though it's awesome!
+Try React Router 5 though it's awesome!
 
 ## Usage
 
@@ -14,7 +14,6 @@ To install `koa-react-router`:
 ```
 
 > Note: `react` `react-dom` & `react-router` are all `peerDependencies` of `koa-react-router`.
-> This allows your application to easily keep up to date with the latest versions of the frameworks.
 
 `koa-react-router` can be mounted easily in a koa 2 application like so:
 
@@ -188,6 +187,25 @@ The final page render would look something like:
   <body>
     <p>hello container</p>
     <div>
+      <!-- View html in here -->
+    </div>
+  </body>
+</html>
+```
+
+### `id`
+
+Optional id for React to use as the base of the app. **Default**: `app`
+
+In order for React to re-hydrate the DOM on the client it needs to know where it should attach itself. In a previous version of `koa-react-router` this was not [possible](https://github.com/afenton90/koa-react-router/issues/11). This property allows you to add a custom root id to the DOM. For example, if you set this to `root`, the output would look something like.
+
+```html
+<html lang="en">
+  <head>
+    <script>//State config</script>
+  </head>
+  <body>
+    <div id="root">
       <!-- View html in here -->
     </div>
   </body>
