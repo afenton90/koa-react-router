@@ -17,7 +17,7 @@ const Container = ({ children }) =>
 const Index = () => <div>I am Home</div>;
 const Away = () => <div>I am away in a route</div>;
 const App = () =>
-  <div>
+  <div id="the-app-proper">
     <Route path="/" component={Index} exact />
     <Route path="/away" component={Away} exact />
   </div>;
@@ -344,3 +344,42 @@ test('should throw an error if preRender callback doesn\'t return component', as
     })
   );
 });
+
+test('should render with specific root id', async () => {
+  const id = 'root';
+  const callbacks = mockCallbacks();
+  const ctx = {
+    request: {
+      url: '/'
+    },
+    response: {}
+  };
+  const next = jest.fn();
+
+  await koaReactRouter({
+    App,
+    id,
+    ...callbacks
+  })(ctx, next);
+
+  expect(ctx.response.body).toEqual(expect.stringContaining(`<div id="root"><div id="the-app-proper"><div>I am Home</div>`));
+});
+
+test('should render with default root id if not supplied', async () => {
+  const callbacks = mockCallbacks();
+  const ctx = {
+    request: {
+      url: '/'
+    },
+    response: {}
+  };
+  const next = jest.fn();
+
+  await koaReactRouter({
+    App,
+    ...callbacks
+  })(ctx, next);
+
+  expect(ctx.response.body).toEqual(expect.stringContaining(`<div id="app"><div id="the-app-proper"><div>I am Home</div>`));
+});
+

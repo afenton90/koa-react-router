@@ -7,7 +7,8 @@ const server = ({
   onError,
   onRedirect,
   onRender,
-  preRender = router => router
+  preRender = router => router,
+  id = 'app'
 }) => async (ctx, next) => {
   try {
     const location = ctx.request.url;
@@ -46,7 +47,7 @@ const server = ({
       } else {
         rendered = renderToStaticMarkup(
           <Container>
-            <div dangerouslySetInnerHTML={{ __html: view }} />
+            <div id={id} dangerouslySetInnerHTML={{ __html: view }} />
           </Container>
         );
       }
